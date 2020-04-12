@@ -48,6 +48,11 @@ pandoc -f markdown_strict --bibliography=bibliography.bib --filter pandoc-citepr
 
 # Introduction
 
+The ability to easily integrate user-defined constitutive equations
+plays a major role in the versatility of (mechanical) solvers^[The term
+solver emphasizes that the numerical method used to discretize the
+equilibrium equations is not significant in the present context.].
+
 Constitutive equations describe how the internal state variables of a
 material evolve with changing external conditions or mechanical
 loading. Those state variables can describe many microstructural
@@ -65,28 +70,23 @@ At each time step, the constitutive equations must be integrated to
 obtain the state of the material at the end of the time step. As most
 phenomena are nonlinear, an iterative scheme is required at the
 equilibrium scale to find the local loading of the material: the
-integration of the constitutive equations is thus called several times
-with different estimates of the loading of the material. 
-Algorithmic efficiency at the constitutive level is therefore key
-for the overall efficiency of a code.
-
-The ability to easily integrate user-defined constitutive equations
-plays a major role in the versatility of (mechanical) solvers^[The term
-solver emphasizes that the numerical method used to discretize the
-equilibrium equations is not significant in the present context.].
+integration of the constitutive equations is thus therefore called several times
+with different estimates of the loading of the material. Algorithmic
+efficiency at the constitutive level is therefore a key aspect for the
+overall efficiency of a code.
 
 The `MFront` open-source code generator has been designed to simplify
 the implementation of the integration of the constitutive equations over
 a time step, to minimize errors during implementation, to facilitate the
-change of the underlying solver, and to help achieve
- reproducible and efficient code [@helfer_introducing_2015;@cea_mfront_2019].
-For that purpose, `MFront` departs from a source file with a syntax very
-close to an engineering description of the constitutive model, 
-from that generates `C++` code specific to many 
-well-established (mostly thermo-mechanical) solvers through dedicated
-interfaces and compiles them into shared libraries. For example,
-`MFront` provides interfaces for `Cast3M`, `code_aster`, `Europlexus`,
-`Abaqus/Standard`, `Abaqus/Explicit`, `CalculiX`, etc.
+portability of constitutive equations between solvers, and to help
+achieve a reproducible and efficient code
+[@helfer_introducing_2015;@cea_mfront_2019]. For that purpose, `MFront`
+uses a source file with a syntax very close to a physical/engineering
+description of the constitutive model, and generates `C++` code specific
+to many well-established (mostly thermo-mechanical) solvers through
+dedicated interfaces and compiles them into shared libraries. For
+example, `MFront` provides interfaces for `Cast3M`, `code_aster`,
+`Europlexus`, `Abaqus/Standard`, `Abaqus/Explicit`, `CalculiX`, etc.
 
 To further facilitate this cross-software integration, 
 `MFront` recently introduced a so-called `generic` interface. This paper
@@ -111,17 +111,17 @@ This paper is divided into three parts:
 
 The aims of the `MFrontGenericInterfaceSupport` project are twofold:
 
-1. At the pre-processing state `MGIS` shall provide the possibility 
-of retrieving metadata about a
-  particular behaviour and performing proper memory allocation. At the
-  post-processing stage, easy access to internal state variables is desired.
-2. During computations, `MGIS` shall simplify the integration of the behaviour at
-  integration points^[The term "integration points" is used here as a
-  generic placeholder. When using FFT for solving the equilibrium
-  equations, the integration points are voxels. When using FEM, the
-  integration points are typically the Gauss points of the elements.] and
-  the update of the internal state variables from one time step to the
-  next.
+1. At the pre-processing state `MGIS` shall provide the possibility of
+  retrieving metadata about a particular behaviour and performing proper
+  memory allocation. At the post-processing stage, easy access to
+  internal state variables is desired.
+2. During computations, `MGIS` shall simplify the integration of the
+  behaviour at integration points^[The term "integration points" is used
+  here as a generic placeholder. When using FFT for solving the
+  equilibrium equations, the integration points are voxels. When using
+  FEM, the integration points are typically the Gauss points of the
+  elements.] and the update of the internal state variables from one
+  time step to the next.
 
 ## Preprocessing and post-processing stages{#sec:prepost}
 
@@ -129,15 +129,21 @@ When dealing with user-defined behaviours, most solvers, including
 `Abaqus/Standard` for example, delegates part of the work to the
 user. The user must:
 
-1. describe the behaviour in the input
+1. describe the behaviour in the input. 
 2. take care of the consistency of the behaviour with the hypothesis
   made during the computation (e.g. a finite strain behaviour must be
   used in a finite strain analysis based on the appropriate deformation
   and stress measures as well as reference configurations).
 
-In the authors' experience, this is error-prone in particular for 
-inexperienced users and may lead to spurious 
-or even worse inexact results.
+In the authors' experience, this is error-prone in particular for
+inexperienced users and may lead to spurious or even worse inexact
+results. For example, when material properties such as the Young Modulus
+or the Poission ratio, are required by the behaviour, those are
+generally defined in the solver input file by an array of values and
+potential checks are limited to the size of the array. An user may thus
+invert two material properties. If those two material properties have
+the same order of magnitudes, computations might lead to a physically
+consistent result, despite this result being false.
 
 `MGIS` introduces a very different approach: the user only declares the
 shared library, the behaviour and the modelling hypothesis
@@ -150,9 +156,8 @@ The metadata can also be used to allocate the memory required to store
 the state of the material at each integration point. `MGIS`' design
 allows the following types of storage:
 
-- An `MGIS` data structure per integration point. While this causes
-  memory fragmentation, this is the most frequent choice. The memory is
-  automatically allocated by `MGIS`.
+- An `MGIS` data structure per integration point. This is the most
+  frequent choice. The memory is automatically allocated by `MGIS`.
 - An `MGIS` data structure that stores the states of an arbitrary number
   of integration points. `MGIS` can allocate the memory associated with
   the state of all specified integration points or borrow memory
@@ -216,10 +221,10 @@ processes in porous and fractured media, inspired by FEFLOW and ROCKFLOW
 concepts and continuously developed since the mid-eighties, see
 ([@Kolditz:1990;@Wollrath:1990;@Kroehn:1991;@Helmig:1993;@kolditz_opengeosys:_2012;@Bilke2019]).
 
-The OGS framework is targeting applications in the environmental geosciences,
-e.g., in the fields of contaminant hydrology, water resources and waste management,
-geotechnical applications, geothermal energy systems and energy
-storage.
+The OGS framework is targeting applications in the environmental
+geosciences, e.g., in the fields of contaminant hydrology, water
+resources and waste management, geotechnical applications, geothermal
+energy systems and energy storage.
 
 The most recent version, `OpenGeoSys-6` (`OGS-6`)
 ([@Naumov:2018;@Bilke2019]), is a fundamental re-implementation of the
@@ -234,19 +239,25 @@ function spaces, non-local formulations and phase-field models for
 fracture ([@Watanabe2012;@Parisio2018;@Yoshioka2019]).
 
 To simplify the implementation of new constitutive models for solids
- developed with `MFront`, `OGS-6` relies on the `C` bindings of
-`MGIS`.
+developed with `MFront`, `OGS-6` relies on the `C` bindings of `MGIS`.
 
-!["Figure 2: Slope stability analysis with strength reduction performed in OpenGeoSys. The image on the left shows the norm of the displacement vector for a low top load. The image on the right shows the equivalent plastic strain for a setting with an increased top load."](img/ogs_strength_reduction.png "Strength reduction for slope stability analysis in OpenGeoSys.")
+!["Figure 2: Slope stability analysis with strength reduction performed
+in OpenGeoSys. The image on the left shows the norm of the displacement
+vector for a low top load. The image on the right shows the equivalent
+plastic strain for a setting with an increased top
+load."](img/ogs_strength_reduction.png "Strength reduction for slope
+stability analysis in OpenGeoSys.")
 
-Figure 2 shows the results of a $\varphi-c$ reduction approach to slope stability analysis.
-The soil is modelled by a non-associated plastic behaviour based on the Mohr-Coulomb 
-yield criterion. The implementation presented in @Nagel2016 was extended by a tension cut-off.
-The image on the left shows the norm of the displacement vector for a low top load. 
-The failure kinematics are clearly visible. 
-The image on the right shows the equivalent plastic strain for a setting with an increased top load. 
-It can be seen that the failure mechanism becomes more complex with an additional 
-slip surface forming beneath the load.
+Figure 2 shows the results of a $\varphi-c$ reduction approach to slope
+stability analysis. The soil is modelled by a non-associated plastic
+behaviour based on the Mohr-Coulomb yield criterion
+[@zienkiewicz-pande-77;@abbo_smooth_1995]. The implementation
+presented in @Nagel2016 was extended by a tension cut-off. The image on
+the left shows the norm of the displacement vector for a low top load.
+The failure kinematics are clearly visible. The image on the right shows
+the equivalent plastic strain for a setting with an increased top load.
+It can be seen that the failure mechanism becomes more complex with an
+additional slip surface forming beneath the load.
 
 
 
@@ -302,7 +313,7 @@ the different solver platforms.
 This research was conducted in the framework of the `PLEIADES` project,
 which is supported financially by the CEA (Commissariat à l’Energie
 Atomique et aux Energies Alternatives), EDF (Electricité de France) and
-Framatome.Acknowledgements
+Framatome.
 
 We would like to express our thanks to Christoph Lehmann, Francesco Parisio,
 Olaf Kolditz and the entire
