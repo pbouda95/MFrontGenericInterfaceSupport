@@ -2383,6 +2383,7 @@ contains
   function material_state_manager_get_uniform_material_property(v, s, n)&
        result(r)
     use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan
+    use, intrinsic :: iso_c_binding, only: c_double
     use mgis_fortran_utilities
     use mgis, only: mgis_status, MGIS_SUCCESS
     implicit none
@@ -2399,13 +2400,13 @@ contains
          type(mgis_status) :: r
        end function msm_get_uniform_material_property
     end interface
-    real(kind=8), intent(out) :: v
+    real(kind=c_double), intent(out) :: v
     type(MaterialStateManager), intent(in) :: s
     character(len=*), intent(in) :: n
     type(mgis_status) :: r
     r = msm_get_uniform_material_property(&
          v, s%ptr, convert_fortran_string(n))
-    if( r % exit_status .eq. MGIS_SUCCESS) then
+    if( r % exit_status .ne. MGIS_SUCCESS) then
        v = ieee_value(v, ieee_quiet_nan)
     end if
   end function material_state_manager_get_uniform_material_property
@@ -2609,6 +2610,7 @@ contains
   function material_state_manager_get_uniform_external_state_variable(v, s, n)&
        result(r)
     use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan
+    use, intrinsic :: iso_c_binding, only: c_double
     use mgis_fortran_utilities
     use mgis, only: mgis_status, MGIS_SUCCESS
     implicit none
@@ -2625,13 +2627,13 @@ contains
          type(mgis_status) :: r
        end function msm_get_uniform_external_state_variable
     end interface
-    real(kind=8), intent(out) :: v
+    real(kind=c_double), intent(out) :: v
     type(MaterialStateManager), intent(in) :: s
     character(len=*), intent(in) :: n
     type(mgis_status) :: r
     r = msm_get_uniform_external_state_variable(&
          v, s%ptr, convert_fortran_string(n))
-    if( r % exit_status .eq. MGIS_SUCCESS) then
+    if( r % exit_status .ne. MGIS_SUCCESS) then
        v = ieee_value(v, ieee_quiet_nan)
     end if
   end function material_state_manager_get_uniform_external_state_variable
